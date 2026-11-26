@@ -1,203 +1,399 @@
 
 Option Explicit
 
-Public Sub CreerDropDown( _
-    ByVal ws As Worksheet, _
-    ByVal nom As String, _
-    ByVal elements As Variant, _
-    ByVal x As Double, _
-    ByVal y As Double, _
-    Optional ByVal largeur As Double = 250, _
-    Optional ByVal hauteur As Double = 40)
+' ==========================================
+' CONFIGURATION VISUELLE
+' ==========================================
 
+Private Const BG As Long = 15790320
+Private Const NAVY As Long = 1050624
+Private Const BLUE As Long = 1518549
+Private Const WHITE As Long = 16777215
+Private Const GREY As Long = 15132390
+Private Const ACCENT As Long = 4899327
+
+' ==========================================
+' CONSTRUCTION DE L'INTERFACE
+' ==========================================
+
+Public Sub GenererInterface()
+
+    Dim ws As Worksheet
     Dim shp As Shape
-    Dim i As Long
-    Dim nb As Long
 
-    nb = UBound(elements) - LBound(elements) + 1
+    Set ws = ThisWorkbook.Worksheets("TEST")
 
-    ' Supprimer l'ancien composant
-    On Error Resume Next
+    Application.ScreenUpdating = False
 
-    ws.Shapes("DD_" & nom).Delete
+    On Error GoTo GestionErreur
 
-    For i = 1 To nb
-        ws.Shapes("DD_ITEM_" & nom & "_" & i).Delete
-    Next i
+    ws.Activate
 
-    On Error GoTo 0
+    ActiveWindow.DisplayGridlines = False
+    ActiveWindow.DisplayHeadings = False
+    ActiveWindow.DisplayWorkbookTabs = False
 
-    ' ==================================
-    ' CHAMP PRINCIPAL
-    ' ==================================
+    ' Nettoyage de l'interface
+    ws.Cells.Clear
 
-    Set shp = ws.Shapes.AddShape( _
-        msoShapeRoundedRectangle, _
-        x, y, largeur, hauteur)
+    For Each shp In ws.Shapes
+        shp.Delete
+    Next shp
 
-    With shp
+    ws.Cells.Interior.Color = BG
+    ws.Cells.Font.Name = "Segoe UI"
+    ws.Cells.Font.Size = 10
 
-        .Name = "DD_" & nom
+    ws.Rows.RowHeight = 25
+    ws.Columns.ColumnWidth = 4
 
-        .Fill.ForeColor.RGB = RGB(255, 255, 255)
-        .Line.ForeColor.RGB = RGB(210, 220, 230)
-        .Line.Weight = 1
+    ActiveWindow.Zoom = 85
 
-        With .TextFrame2
+    ' ======================================
+    ' HEADER
+    ' ======================================
 
-            .TextRange.Text = "Sélectionner une option..."
-            .TextRange.Font.Name = "Segoe UI"
-            .TextRange.Font.Size = 10
-            .TextRange.Font.Fill.ForeColor.RGB = RGB(16, 32, 64)
+    Set shp = ws.Shapes.AddShape(msoShapeRectangle, 0, 0, 1050, 85)
 
-            .MarginLeft = 12
-            .MarginRight = 30
-            .VerticalAnchor = msoAnchorMiddle
+    shp.Fill.ForeColor.RGB = NAVY
+    shp.Line.Visible = msoFalse
 
-        End With
+    Set shp = ws.Shapes.AddShape(msoShapeRoundedRectangle, 25, 17, 52, 52)
 
-        .OnAction = "OuvrirDropDown"
+    shp.Fill.ForeColor.RGB = WHITE
+    shp.Line.Visible = msoFalse
 
-        .AlternativeText = nom
-
+    With shp.TextFrame2
+        .TextRange.Text = "NG"
+        .TextRange.Font.Name = "Segoe UI"
+        .TextRange.Font.Size = 18
+        .TextRange.Font.Bold = msoTrue
+        .TextRange.Font.Fill.ForeColor.RGB = NAVY
+        .VerticalAnchor = msoAnchorMiddle
+        .TextRange.ParagraphFormat.Alignment = msoAlignCenter
     End With
 
-    ' ==================================
-    ' FLECHE
-    ' ==================================
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 95, 19, 500, 30)
 
-    Set shp = ws.Shapes.AddTextbox( _
-        msoTextOrientationHorizontal, _
-        x + largeur - 32, y + 5, 25, hauteur - 10)
-
-    With shp
-
-        .Name = "DD_ARROW_" & nom
-
-        .Fill.Visible = msoFalse
-        .Line.Visible = msoFalse
-
-        With .TextFrame2
-
-            .TextRange.Text = ChrW(&H25BE)
-            .TextRange.Font.Name = "Segoe UI"
-            .TextRange.Font.Size = 17
-            .TextRange.Font.Fill.ForeColor.RGB = RGB(23, 82, 145)
-
-            .TextRange.ParagraphFormat.Alignment = msoAlignCenter
-            .VerticalAnchor = msoAnchorMiddle
-
-        End With
-
-        .OnAction = "OuvrirDropDown"
-        .AlternativeText = nom
-
+    With shp.TextFrame2
+        .TextRange.Text = "NAVAL GROUP"
+        .TextRange.Font.Name = "Segoe UI"
+        .TextRange.Font.Size = 22
+        .TextRange.Font.Bold = msoTrue
+        .TextRange.Font.Fill.ForeColor.RGB = WHITE
     End With
 
-    ' ==================================
-    ' ELEMENTS DE LA LISTE
-    ' ==================================
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
 
-    For i = LBound(elements) To UBound(elements)
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 97, 50, 500, 20)
 
-        Set shp = ws.Shapes.AddShape( _
-            msoShapeRoundedRectangle, _
-            x, _
-            y + hauteur + ((i - LBound(elements)) * 34), _
-            largeur, 32)
+    With shp.TextFrame2
+        .TextRange.Text = "ESPACE DE TRAVAIL | PORTAIL DE GESTION"
+        .TextRange.Font.Size = 9
+        .TextRange.Font.Fill.ForeColor.RGB = RGB(190, 205, 220)
+    End With
 
-        With shp
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
 
-            .Name = "DD_ITEM_" & nom & "_" & _
-                    (i - LBound(elements) + 1)
+    ' ======================================
+    ' TITRE CENTRAL
+    ' ======================================
 
-            .Fill.ForeColor.RGB = RGB(255, 255, 255)
-            .Line.ForeColor.RGB = RGB(220, 225, 232)
-            .Line.Weight = 0.5
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 50, 115, 900, 45)
 
-            With .TextFrame2
+    With shp.TextFrame2
+        .TextRange.Text = "Bienvenue dans votre espace"
+        .TextRange.Font.Size = 25
+        .TextRange.Font.Bold = msoTrue
+        .TextRange.Font.Fill.ForeColor.RGB = NAVY
+    End With
 
-                .TextRange.Text = CStr(elements(i))
-                .TextRange.Font.Name = "Segoe UI"
-                .TextRange.Font.Size = 10
-                .TextRange.Font.Fill.ForeColor.RGB = RGB(16, 32, 64)
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
 
-                .MarginLeft = 12
-                .VerticalAnchor = msoAnchorMiddle
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 52, 157, 900, 25)
 
-            End With
+    With shp.TextFrame2
+        .TextRange.Text = "Sélectionnez une fonctionnalité pour commencer."
+        .TextRange.Font.Size = 11
+        .TextRange.Font.Fill.ForeColor.RGB = RGB(100, 110, 125)
+    End With
 
-            .AlternativeText = nom
-            .OnAction = "ChoisirDropDown"
-            .Visible = msoFalse
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
 
-        End With
+    ' ======================================
+    ' MENU PRINCIPAL
+    ' ======================================
 
-    Next i
+    Call CreerBouton(ws, "TABLEAU DE BORD", "Accueil", 65, 225, BLUE)
+    Call CreerBouton(ws, "NOUVEAU DOSSIER", "NouveauDossier", 355, 225, NAVY)
+    Call CreerBouton(ws, "CONSULTATION", "Consultation", 645, 225, NAVY)
 
-    ' Mémoriser le nombre d'options
-    ws.Shapes("DD_" & nom).Tags.Add "Nombre", CStr(nb)
+    Call CreerBouton(ws, "RAPPORTS", "Rapports", 65, 335, NAVY)
+    Call CreerBouton(ws, "PARAMÈTRES", "Parametres", 355, 335, NAVY)
+    Call CreerBouton(ws, "ASSISTANCE", "Assistance", 645, 335, NAVY)
+
+    ' ======================================
+    ' ZONE DE SELECTION
+    ' ======================================
+
+    Set shp = ws.Shapes.AddShape(msoShapeRoundedRectangle, 65, 445, 870, 150)
+
+    shp.Fill.ForeColor.RGB = WHITE
+    shp.Line.ForeColor.RGB = GREY
+    shp.Line.Weight = 1
+
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 90, 455, 800, 25)
+
+    With shp.TextFrame2
+        .TextRange.Text = "SÉLECTION RAPIDE"
+        .TextRange.Font.Size = 11
+        .TextRange.Font.Bold = msoTrue
+        .TextRange.Font.Fill.ForeColor.RGB = BLUE
+    End With
+
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
+
+    ' Libellé service
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 95, 490, 150, 20)
+
+    With shp.TextFrame2
+        .TextRange.Text = "Choisir un service :"
+        .TextRange.Font.Size = 10
+        .TextRange.Font.Bold = msoTrue
+        .TextRange.Font.Fill.ForeColor.RGB = NAVY
+    End With
+
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
+
+    ' Liste déroulante service
+    Call CreerListeDeroulante(ws, "cmbService", _
+        95, 515, 250, 28, _
+        Array("Production", "Bureau d'études", "Maintenance", _
+              "Qualité", "Logistique", "Administration"))
+
+    ' Libellé statut
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 390, 490, 150, 20)
+
+    With shp.TextFrame2
+        .TextRange.Text = "Choisir un statut :"
+        .TextRange.Font.Size = 10
+        .TextRange.Font.Bold = msoTrue
+        .TextRange.Font.Fill.ForeColor.RGB = NAVY
+    End With
+
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
+
+    ' Liste déroulante statut
+    Call CreerListeDeroulante(ws, "cmbStatut", _
+        390, 515, 220, 28, _
+        Array("En attente", "En cours", "Terminé", "Annulé"))
+
+    ' Bouton validation
+    Call CreerBouton(ws, "VALIDER", "ValiderSelection", _
+                     680, 510, BLUE)
+
+    ' Réduction de la taille du bouton
+    ws.Shapes(ws.Shapes.Count).Width = 180
+    ws.Shapes(ws.Shapes.Count).Height = 38
+
+    ' ======================================
+    ' FOOTER
+    ' ======================================
+
+    Set shp = ws.Shapes.AddShape(msoShapeRectangle, 0, 630, 1050, 35)
+
+    shp.Fill.ForeColor.RGB = NAVY
+    shp.Line.Visible = msoFalse
+
+    Set shp = ws.Shapes.AddTextbox(msoTextOrientationHorizontal, 25, 637, 1000, 20)
+
+    With shp.TextFrame2
+        .TextRange.Text = "NAVAL GROUP | ENVIRONNEMENT DE TRAVAIL | VERSION 2.0"
+        .TextRange.Font.Size = 8
+        .TextRange.Font.Fill.ForeColor.RGB = WHITE
+        .TextRange.ParagraphFormat.Alignment = msoAlignCenter
+    End With
+
+    shp.Line.Visible = msoFalse
+    shp.Fill.Visible = msoFalse
+
+    ' ======================================
+    ' FINALISATION
+    ' ======================================
+
+    ws.Activate
+
+    ActiveWindow.DisplayGridlines = False
+    ActiveWindow.DisplayHeadings = False
+    ActiveWindow.Zoom = 85
+
+    Application.ScreenUpdating = True
+
+    Exit Sub
+
+GestionErreur:
+
+    Application.ScreenUpdating = True
+
+    MsgBox "Erreur lors de la création de l'interface : " _
+           & Err.Description, vbCritical
 
 End Sub
 
 ' ==========================================
-' OUVRIR / FERMER LA LISTE
+' CREATION DES BOUTONS
 ' ==========================================
 
-Public Sub OuvrirDropDown()
+Private Sub CreerBouton(ByVal ws As Worksheet, _
+                        ByVal titre As String, _
+                        ByVal macro As String, _
+                        ByVal x As Double, _
+                        ByVal y As Double, _
+                        ByVal couleur As Long)
 
-    Dim ws As Worksheet
-    Dim nom As String
-    Dim nb As Long
-    Dim i As Long
-    Dim visible As Boolean
+    Dim shp As Shape
 
-    Set ws = ActiveSheet
+    Set shp = ws.Shapes.AddShape(msoShapeRoundedRectangle, x, y, 250, 75)
 
-    nom = ws.Shapes(Application.Caller).AlternativeText
+    shp.Fill.ForeColor.RGB = couleur
+    shp.Line.Visible = msoFalse
 
-    nb = CLng(ws.Shapes("DD_" & nom).Tags("Nombre"))
+    With shp.TextFrame2
+        .TextRange.Text = titre
+        .TextRange.Font.Name = "Segoe UI"
+        .TextRange.Font.Size = 12
+        .TextRange.Font.Bold = msoTrue
+        .TextRange.Font.Fill.ForeColor.RGB = WHITE
+        .VerticalAnchor = msoAnchorMiddle
+        .TextRange.ParagraphFormat.Alignment = msoAlignCenter
+    End With
 
-    visible = ws.Shapes("DD_ITEM_" & nom & "_1").Visible
-
-    For i = 1 To nb
-
-        ws.Shapes("DD_ITEM_" & nom & "_" & i).Visible = Not visible
-
-    Next i
+    shp.OnAction = macro
 
 End Sub
 
 ' ==========================================
-' SELECTIONNER UNE OPTION
+' CREATION DES LISTES DEROULANTES
 ' ==========================================
 
-Public Sub ChoisirDropDown()
+Private Sub CreerListeDeroulante(ByVal ws As Worksheet, _
+                                 ByVal nom As String, _
+                                 ByVal x As Double, _
+                                 ByVal y As Double, _
+                                 ByVal largeur As Double, _
+                                 ByVal hauteur As Double, _
+                                 ByVal elements As Variant)
+
+    Dim obj As OLEObject
+    Dim i As Long
+
+    Set obj = ws.OLEObjects.Add( _
+        ClassType:="Forms.ComboBox.1", _
+        Left:=x, _
+        Top:=y, _
+        Width:=largeur, _
+        Height:=hauteur)
+
+    With obj
+
+        .Name = nom
+        .Placement = xlFreeFloating
+
+        With .Object
+
+            .Clear
+
+            For i = LBound(elements) To UBound(elements)
+                .AddItem elements(i)
+            Next i
+
+            .Style = 2
+            .Font.Name = "Segoe UI"
+            .Font.Size = 10
+            .BackColor = WHITE
+            .ForeColor = NAVY
+            .MatchRequired = True
+
+        End With
+
+    End With
+
+End Sub
+
+' ==========================================
+' VALIDATION DES LISTES
+' ==========================================
+
+Public Sub ValiderSelection()
 
     Dim ws As Worksheet
-    Dim shp As Shape
-    Dim nom As String
-    Dim nb As Long
-    Dim i As Long
-    Dim valeur As String
+    Dim service As String
+    Dim statut As String
 
-    Set ws = ActiveSheet
+    Set ws = ThisWorkbook.Worksheets("TEST")
 
-    Set shp = ws.Shapes(Application.Caller)
+    service = ws.OLEObjects("cmbService").Object.Value
+    statut = ws.OLEObjects("cmbStatut").Object.Value
 
-    nom = shp.AlternativeText
-    valeur = shp.TextFrame2.TextRange.Text
+    If service = "" Or statut = "" Then
 
-    nb = CLng(ws.Shapes("DD_" & nom).Tags("Nombre"))
+        MsgBox "Veuillez sélectionner un service et un statut.", _
+               vbExclamation, "Sélection incomplète"
 
-    ' Mettre à jour la valeur sélectionnée
-    ws.Shapes("DD_" & nom).TextFrame2.TextRange.Text = valeur
+        Exit Sub
 
-    ' Fermer la liste
-    For i = 1 To nb
+    End If
 
-        ws.Shapes("DD_ITEM_" & nom & "_" & i).Visible = msoFalse
+    MsgBox "Sélection enregistrée :" & vbCrLf & vbCrLf & _
+           "Service : " & service & vbCrLf & _
+           "Statut : " & statut, _
+           vbInformation, "Validation"
 
-    Next i
+End Sub
+
+' ==========================================
+' ACTIONS DES BOUTONS
+' ==========================================
+
+Public Sub Accueil()
+
+    MsgBox "Bienvenue dans votre tableau de bord.", vbInformation
+
+End Sub
+
+Public Sub NouveauDossier()
+
+    MsgBox "Module Nouveau Dossier", vbInformation
+
+End Sub
+
+Public Sub Consultation()
+
+    MsgBox "Module Consultation", vbInformation
+
+End Sub
+
+Public Sub Rapports()
+
+    MsgBox "Module Rapports", vbInformation
+
+End Sub
+
+Public Sub Parametres()
+
+    MsgBox "Module Paramètres", vbInformation
+
+End Sub
+
+Public Sub Assistance()
+
+    MsgBox "Module Assistance", vbInformation
 
 End Sub
